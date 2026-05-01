@@ -1,0 +1,339 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>PT·Notes</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { background: #0c0c0c; color: #ddd8cc; font-family: Georgia, serif; }
+    #app { max-width: 680px; margin: 0 auto; min-height: 100vh; position: relative; }
+
+    header { display: flex; align-items: center; justify-content: space-between; padding: 14px 20px; border-bottom: 1px solid #1c1c1c; position: sticky; top: 0; background: #0c0c0c; z-index: 10; }
+    .logo { font-size: 20px; font-weight: bold; letter-spacing: 1px; }
+    .gold { color: #c8a96e; }
+    .back-btn { background: none; border: none; color: #c8a96e; cursor: pointer; font-size: 14px; font-family: Georgia, serif; }
+    .icon-btn { background: #1a1a1a; border: 1px solid #2a2a2a; border-radius: 7px; color: #c8a96e; width: 32px; height: 32px; cursor: pointer; font-size: 16px; display: inline-flex; align-items: center; justify-content: center; }
+    .header-icons { display: flex; gap: 8px; }
+
+    .body { padding: 22px 20px; }
+    .eyebrow { font-size: 11px; letter-spacing: 3px; text-transform: uppercase; color: #444; margin-bottom: 18px; font-family: monospace; }
+
+    .add-row { display: flex; gap: 10px; margin-bottom: 26px; }
+    .add-input { flex: 1; background: #141414; border: 1px solid #252525; border-radius: 8px; padding: 10px 14px; color: #ddd8cc; font-size: 15px; font-family: Georgia, serif; outline: none; }
+    .gold-btn { background: #c8a96e; border: none; border-radius: 8px; padding: 10px 16px; color: #0c0c0c; font-weight: bold; cursor: pointer; font-size: 13px; white-space: nowrap; font-family: Georgia, serif; flex-shrink: 0; }
+    .ghost-btn { background: none; border: 1px solid #2a2a2a; border-radius: 8px; padding: 10px 16px; color: #888; cursor: pointer; font-size: 13px; font-family: Georgia, serif; }
+    .danger-btn { background: none; border: 1px solid #3a1515; border-radius: 8px; color: #bb4444; padding: 8px 16px; cursor: pointer; font-size: 13px; font-family: Georgia, serif; margin-top: 24px; }
+
+    .client-list { display: flex; flex-direction: column; gap: 8px; }
+    .client-card { background: #141414; border: 1px solid #1e1e1e; border-radius: 10px; padding: 13px 16px; display: flex; align-items: center; gap: 14px; cursor: pointer; }
+    .avatar { width: 38px; height: 38px; border-radius: 50%; background: #c8a96e15; border: 1px solid #c8a96e30; display: flex; align-items: center; justify-content: center; font-size: 17px; color: #c8a96e; font-weight: bold; flex-shrink: 0; }
+    .client-name { font-size: 15px; font-weight: bold; }
+    .client-meta { font-size: 12px; color: #555; font-family: monospace; margin-top: 2px; }
+    .chevron { color: #3a3a3a; margin-left: auto; }
+    .empty-hint { color: #444; font-size: 14px; text-align: center; margin-top: 52px; }
+    .backup-hint { margin-top: 32px; text-align: center; color: #555; font-size: 12px; font-family: monospace; }
+
+    .tabs { display: flex; border-bottom: 1px solid #1c1c1c; padding: 0 20px; }
+    .tab-btn { background: none; border: none; border-bottom: 2px solid transparent; color: #555; padding: 11px 20px 9px; cursor: pointer; font-size: 14px; font-family: Georgia, serif; margin-bottom: -1px; }
+    .tab-btn.active { border-bottom-color: #c8a96e; color: #c8a96e; }
+
+    .field { margin-bottom: 18px; }
+    label { display: block; font-size: 11px; letter-spacing: 2px; text-transform: uppercase; color: #555; margin-bottom: 7px; font-family: monospace; }
+    input[type=text], input[type=date] { width: 100%; background: #141414; border: 1px solid #222; border-radius: 8px; padding: 9px 13px; color: #ddd8cc; font-size: 15px; font-family: Georgia, serif; outline: none; }
+    textarea { width: 100%; background: #141414; border: 1px solid #222; border-radius: 8px; padding: 10px 13px; color: #ddd8cc; font-size: 15px; font-family: Georgia, serif; outline: none; resize: vertical; line-height: 1.65; }
+
+    .nav-bar { display: flex; align-items: center; gap: 8px; margin-bottom: 22px; background: #141414; border: 1px solid #1e1e1e; border-radius: 10px; padding: 10px 12px; }
+    .nav-arrow { background: none; border: 1px solid #282828; border-radius: 6px; color: #c8a96e; width: 34px; height: 34px; cursor: pointer; font-size: 20px; flex-shrink: 0; }
+    .nav-arrow:disabled { opacity: 0.3; cursor: default; }
+    .session-select { flex: 1; background: #0c0c0c; border: 1px solid #222; border-radius: 6px; padding: 7px 10px; color: #ddd8cc; font-size: 14px; font-family: Georgia, serif; outline: none; }
+    .empty-sessions { text-align: center; padding-top: 52px; }
+    .empty-sessions p { color: #555; margin-bottom: 20px; }
+
+    .toast { position: fixed; top: 16px; left: 50%; transform: translateX(-50%); padding: 10px 20px; border-radius: 8px; color: #0c0c0c; font-weight: bold; font-size: 13px; font-family: monospace; z-index: 100; box-shadow: 0 4px 20px rgba(0,0,0,0.4); display: none; }
+    .overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.7); display: none; align-items: center; justify-content: center; z-index: 50; }
+    .overlay.visible { display: flex; }
+    .modal { background: #181818; border: 1px solid #2a2a2a; border-radius: 12px; padding: 28px; max-width: 340px; width: 90%; }
+    .modal p { color: #ddd8cc; margin-bottom: 12px; }
+    .modal .warn { font-size: 12px; color: #666; font-family: monospace; margin-bottom: 20px; }
+    .modal-btns { display: flex; gap: 10px; }
+
+    .hidden { display: none; }
+  </style>
+</head>
+<body>
+<div id="app">
+  <!-- Toast -->
+  <div id="toast" class="toast"></div>
+
+  <!-- Import Modal -->
+  <div id="importOverlay" class="overlay">
+    <div class="modal">
+      <p>JSON-Backup importieren</p>
+      <p class="warn">⚠ Bestehende Daten werden überschrieben</p>
+      <div class="modal-btns">
+        <button class="gold-btn" onclick="document.getElementById('fileInput').click()">Datei auswählen</button>
+        <button class="ghost-btn" onclick="closeImport()">Abbrechen</button>
+      </div>
+      <input type="file" id="fileInput" accept=".json" style="display:none" onchange="handleImport(event)" />
+    </div>
+  </div>
+
+  <!-- LIST VIEW -->
+  <div id="viewList">
+    <header>
+      <span class="logo">PT<span class="gold">·</span>Notes</span>
+      <div class="header-icons">
+        <button class="icon-btn" title="Backup importieren" onclick="openImport()">↑</button>
+        <button class="icon-btn" title="Als JSON exportieren" onclick="exportData()">↓</button>
+      </div>
+    </header>
+    <div class="body">
+      <p class="eyebrow">Kunden</p>
+      <div class="add-row">
+        <input class="add-input" id="newClientName" placeholder="Neuer Kunde…" onkeydown="if(event.key==='Enter') addClient()" />
+        <button class="gold-btn" onclick="addClient()">+ Anlegen</button>
+      </div>
+      <div id="clientList" class="client-list"></div>
+      <p id="emptyHint" class="empty-hint hidden">Noch keine Kunden – ersten Kunden oben anlegen.</p>
+      <p id="backupHint" class="backup-hint hidden">💾 Daten lokal gespeichert · ↓ für Backup-Export</p>
+    </div>
+  </div>
+
+  <!-- CLIENT VIEW -->
+  <div id="viewClient" class="hidden">
+    <header>
+      <button class="back-btn" onclick="goBack()">← Zurück</button>
+      <span id="clientTitle" style="font-size:16px;font-weight:bold;"></span>
+      <button class="icon-btn" title="Exportieren" onclick="exportData()">↓</button>
+    </header>
+    <div class="tabs">
+      <button class="tab-btn active" id="tabAnamnese" onclick="switchTab('anamnese')">Anamnese</button>
+      <button class="tab-btn" id="tabTraining" onclick="switchTab('training')">Training (0)</button>
+    </div>
+
+    <!-- Anamnese Tab -->
+    <div id="panelAnamnese" class="body">
+      <div class="field"><label>Geburtsdatum</label><input type="date" id="f_geburtsdatum" oninput="updateAnamnese('geburtsdatum',this.value)" /></div>
+      <div class="field"><label>Trainingsziel</label><input type="text" id="f_ziel" oninput="updateAnamnese('ziel',this.value)" /></div>
+      <div class="field"><label>Vorerkrankungen / Verletzungen</label><textarea id="f_vorerkrankungen" rows="3" oninput="updateAnamnese('vorerkrankungen',this.value)"></textarea></div>
+      <div class="field"><label>Medikamente</label><input type="text" id="f_medikamente" oninput="updateAnamnese('medikamente',this.value)" /></div>
+      <div class="field"><label>Sportliche Vorgeschichte</label><textarea id="f_sport" rows="3" oninput="updateAnamnese('sport',this.value)"></textarea></div>
+      <div class="field"><label>Weitere Notizen</label><textarea id="f_notizen" rows="3" oninput="updateAnamnese('notizen',this.value)"></textarea></div>
+      <button class="danger-btn" onclick="deleteClient()">Kunden löschen</button>
+    </div>
+
+    <!-- Training Tab -->
+    <div id="panelTraining" class="body hidden">
+      <div class="nav-bar">
+        <button class="nav-arrow" id="btnPrev" onclick="prevSession()">‹</button>
+        <select class="session-select" id="sessionSelect" onchange="selectSession(this.value)"></select>
+        <button class="nav-arrow" id="btnNext" onclick="nextSession()">›</button>
+        <button class="gold-btn" onclick="addSession()">+ Einheit</button>
+      </div>
+      <div id="sessionContent">
+        <div class="empty-sessions">
+          <p>Noch keine Einheiten.</p>
+          <button class="gold-btn" onclick="addSession()">Erste Einheit anlegen</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+const STORAGE_KEY = "pt-notes-v1";
+let clients = [];
+let activeClientId = null;
+let activeSessionId = null;
+let currentTab = "anamnese";
+
+function load() {
+  try { const r = localStorage.getItem(STORAGE_KEY); clients = r ? JSON.parse(r) : []; }
+  catch { clients = []; }
+}
+function save() {
+  try { localStorage.setItem(STORAGE_KEY, JSON.stringify(clients)); } catch {}
+}
+function persist(updated) { clients = updated; save(); }
+
+function showToast(msg, color = "#7cbb80") {
+  const t = document.getElementById("toast");
+  t.textContent = msg; t.style.background = color; t.style.display = "block";
+  setTimeout(() => t.style.display = "none", 2500);
+}
+
+function exportData() {
+  const blob = new Blob([JSON.stringify(clients, null, 2)], { type: "application/json" });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = `pt-notes-backup-${new Date().toISOString().split("T")[0]}.json`;
+  a.click(); URL.revokeObjectURL(url);
+  showToast("✓ Export gestartet");
+}
+
+function openImport() { document.getElementById("importOverlay").classList.add("visible"); }
+function closeImport() { document.getElementById("importOverlay").classList.remove("visible"); }
+function handleImport(e) {
+  const file = e.target.files[0]; if (!file) return;
+  const reader = new FileReader();
+  reader.onload = (ev) => {
+    try {
+      const data = JSON.parse(ev.target.result);
+      if (!Array.isArray(data)) throw new Error();
+      persist(data); renderList(); closeImport();
+      showToast("✓ Import erfolgreich");
+    } catch { showToast("⚠ Ungültige Datei", "#cc5555"); }
+  };
+  reader.readAsText(file); e.target.value = "";
+}
+
+function newClientObj(name) {
+  return { id: Date.now().toString(), name, anamnese: { geburtsdatum:"", ziel:"", vorerkrankungen:"", medikamente:"", sport:"", notizen:"" }, sessions: [] };
+}
+function newSessionObj() {
+  return { id: Date.now().toString(), datum: new Date().toISOString().split("T")[0], notiz: "" };
+}
+
+function getClient() { return clients.find(c => c.id === activeClientId); }
+function getSessions() { return getClient()?.sessions || []; }
+function getSession() { return getSessions().find(s => s.id === activeSessionId); }
+
+function renderList() {
+  const list = document.getElementById("clientList");
+  const empty = document.getElementById("emptyHint");
+  const hint = document.getElementById("backupHint");
+  list.innerHTML = "";
+  if (clients.length === 0) { empty.classList.remove("hidden"); hint.classList.add("hidden"); return; }
+  empty.classList.add("hidden"); hint.classList.remove("hidden");
+  clients.forEach(c => {
+    const div = document.createElement("div");
+    div.className = "client-card";
+    div.innerHTML = `<div class="avatar">${c.name[0].toUpperCase()}</div><div style="flex:1"><div class="client-name">${c.name}</div><div class="client-meta">${c.sessions.length} Einheit${c.sessions.length !== 1 ? "en" : ""}</div></div><span class="chevron">→</span>`;
+    div.onclick = () => openClient(c.id);
+    list.appendChild(div);
+  });
+}
+
+function addClient() {
+  const input = document.getElementById("newClientName");
+  if (!input.value.trim()) return;
+  const cl = newClientObj(input.value.trim());
+  persist([...clients, cl]);
+  input.value = "";
+  openClient(cl.id);
+}
+
+function openClient(id) {
+  activeClientId = id;
+  const cl = getClient();
+  activeSessionId = cl?.sessions?.at(-1)?.id || null;
+  document.getElementById("clientTitle").textContent = cl.name;
+  document.getElementById("viewList").classList.add("hidden");
+  document.getElementById("viewClient").classList.remove("hidden");
+  switchTab("anamnese");
+}
+
+function goBack() {
+  document.getElementById("viewClient").classList.add("hidden");
+  document.getElementById("viewList").classList.remove("hidden");
+  renderList();
+}
+
+function deleteClient() {
+  if (!confirm(`${getClient().name} wirklich löschen?`)) return;
+  persist(clients.filter(c => c.id !== activeClientId));
+  goBack();
+}
+
+function switchTab(tab) {
+  currentTab = tab;
+  document.getElementById("tabAnamnese").classList.toggle("active", tab === "anamnese");
+  document.getElementById("tabTraining").classList.toggle("active", tab === "training");
+  document.getElementById("panelAnamnese").classList.toggle("hidden", tab !== "anamnese");
+  document.getElementById("panelTraining").classList.toggle("hidden", tab !== "training");
+  if (tab === "anamnese") renderAnamnese();
+  else renderTraining();
+}
+
+function renderAnamnese() {
+  const a = getClient()?.anamnese || {};
+  ["geburtsdatum","ziel","vorerkrankungen","medikamente","sport","notizen"].forEach(k => {
+    const el = document.getElementById("f_" + k);
+    if (el) el.value = a[k] || "";
+  });
+}
+
+function updateAnamnese(field, value) {
+  persist(clients.map(c => c.id === activeClientId ? { ...c, anamnese: { ...c.anamnese, [field]: value } } : c));
+}
+
+function renderTraining() {
+  const sessions = getSessions();
+  const tabBtn = document.getElementById("tabTraining");
+  tabBtn.textContent = `Training (${sessions.length})`;
+
+  const select = document.getElementById("sessionSelect");
+  select.innerHTML = sessions.length === 0
+    ? '<option value="">Keine Einheiten</option>'
+    : [...sessions].reverse().map(s => `<option value="${s.id}">${s.datum}</option>`).join("");
+  if (activeSessionId) select.value = activeSessionId;
+
+  const sessIdx = sessions.findIndex(s => s.id === activeSessionId);
+  document.getElementById("btnPrev").disabled = sessIdx <= 0;
+  document.getElementById("btnNext").disabled = sessIdx >= sessions.length - 1;
+
+  const content = document.getElementById("sessionContent");
+  const sess = getSession();
+  if (!sess) {
+    content.innerHTML = `<div class="empty-sessions"><p>Noch keine Einheiten.</p><button class="gold-btn" onclick="addSession()">Erste Einheit anlegen</button></div>`;
+    return;
+  }
+  content.innerHTML = `
+    <div class="field"><label>Datum</label><input type="date" id="sessDate" value="${sess.datum}" oninput="updateSession('datum',this.value)" /></div>
+    <div class="field"><label>Training & Notizen</label><textarea id="sessNotiz" rows="12" style="min-height:300px" placeholder="Übungen, Sätze, Gewichte…&#10;&#10;z.B.&#10;Kniebeugen 4×8 @ 80kg&#10;Rudern 3×10&#10;— Knie links beobachten" oninput="updateSession('notiz',this.value)">${sess.notiz}</textarea></div>
+    <button class="danger-btn" onclick="deleteSession()">Einheit löschen</button>
+  `;
+}
+
+function addSession() {
+  const sess = newSessionObj();
+  persist(clients.map(c => c.id === activeClientId ? { ...c, sessions: [...c.sessions, sess] } : c));
+  activeSessionId = sess.id;
+  switchTab("training");
+}
+
+function selectSession(id) { activeSessionId = id; renderTraining(); }
+
+function prevSession() {
+  const sessions = getSessions();
+  const idx = sessions.findIndex(s => s.id === activeSessionId);
+  if (idx > 0) { activeSessionId = sessions[idx - 1].id; renderTraining(); }
+}
+function nextSession() {
+  const sessions = getSessions();
+  const idx = sessions.findIndex(s => s.id === activeSessionId);
+  if (idx < sessions.length - 1) { activeSessionId = sessions[idx + 1].id; renderTraining(); }
+}
+
+function updateSession(field, value) {
+  persist(clients.map(c => c.id === activeClientId
+    ? { ...c, sessions: c.sessions.map(s => s.id === activeSessionId ? { ...s, [field]: value } : s) }
+    : c));
+}
+
+function deleteSession() {
+  if (!confirm("Einheit löschen?")) return;
+  const remaining = getSessions().filter(s => s.id !== activeSessionId);
+  persist(clients.map(c => c.id === activeClientId ? { ...c, sessions: remaining } : c));
+  activeSessionId = remaining.at(-1)?.id || null;
+  renderTraining();
+}
+
+// Init
+load();
+renderList();
+</script>
+</body>
+</html>
